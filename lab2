@@ -1,0 +1,80 @@
+from PIL import Image
+import numpy as np
+
+
+
+inicjaly = Image.open("inicjaly.bmp")  # wczytywanie obrazu
+
+print("tryb", inicjaly.mode)
+print("format", inicjaly.format)
+print("rozmiar", inicjaly.size)
+
+t_inicjaly = np.asarray(inicjaly)
+print("typ danych tablicy", t_inicjaly.dtype)  # typ danych przechowywanych w tablicy
+print("rozmiar tablicy", t_inicjaly.shape)  # rozmiar tablicy - warto porównac z wymiarami obrazka
+
+#zad1
+
+def rysuj_paski_w_obrazie(obraz, grub): # rysuje pionowy pas grubości grub po lewej stronie oraz po prawej stronie
+    tab_obraz = np.asarray(obraz)*1 # wczytanie tablicy obrazu i zamiana na int
+    h, w = tab_obraz.shape
+    for i in range(h):
+        for j in range(grub):
+            tab_obraz[i][j]=0
+        for j in range(w-grub,w):
+            tab_obraz[i][j]=0
+
+    for i in range(w):
+        for j in range(grub):
+            tab_obraz[j][i] = 0
+        for j in range(h - grub, h):
+            tab_obraz[j][i] = 0
+
+    tab = tab_obraz.astype(bool) # zapisanie tablicy w typie bool (obrazy czarnobiałe)
+    return Image.fromarray(tab)
+
+inicjaly_paski = rysuj_paski_w_obrazie(inicjaly, 10)
+inicjaly_paski.show()
+
+#zad2
+inicjaly_paski = rysuj_paski_w_obrazie(inicjaly, 10)
+inicjaly_paski.save("ramka10.bmp")
+inicjaly_paski.show()
+
+inicjaly_paski = rysuj_paski_w_obrazie(inicjaly, 5)
+inicjaly_paski.save("ramka5.bmp")
+inicjaly_paski.show()
+
+#zad3.1
+
+def rysuj_ramke(w, h, grub): # grub grubość ramki w pikselach
+    t = (h, w)  # rozmiar tablicy
+    tab = np.zeros(t, dtype=np.uint8)  # deklaracja tablicy wypełnionej zerami - czarna
+    tab[grub:h - grub, grub:w - grub] = 1  # skrócona wersja ustawienia wartości dla prostokatnego fragmentu tablicy [zakresy wysokości, zakresy szerokości] tablicy
+    tab1 = tab.astype(np.bool_)
+    #return tab * 255  # alternatywny sposób uzyskania tablicy obrazu czarnobiałego ale w trybie odcieni szarości
+    return tab1
+
+tab = rysuj_ramke(120, 60, 8)
+print("typ danych tablicy", tab.dtype)
+print("rozmiar wyrazu tablicy:",   tab.itemsize)
+im_ramka = Image.fromarray(tab)
+
+
+#zad3.2
+def rysuj_pasy_pionie(w, h, grub):  # w, h   -  rozmiar obrazu
+    t = (h, w)  # rozmiar tablicy
+    tab = np.ones(t, dtype=np.uint8)
+    # jaki bedzie efekt, gdy np.ones zamienimy na np.zeros?
+    ile = int(w / grub)  # liczba pasów = 9 o grubości 10
+    for k in range(ile):  # uwaga k = 0,1,2,3,4,5,8   bez dziewiatki
+        for g in range(grub):
+            j = k * grub + g  # i - indeks wiersza, j - indeks kolumny
+            for i in range(h):
+                tab[i, j] = k % 2  # reszta z dzielenia przez dwa
+    tab = tab * 255  # alternatywny sposób uzyskania tablicy obrazu czarnobiałego ale w trybie odcieni szarości
+    return Image.fromarray(tab)  # tworzy obraz
+
+
+obraz = rysuj_pasy_pionie(200, 80, 10)
+obraz.show()
